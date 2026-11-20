@@ -12,8 +12,7 @@ The application is deployed with a Vercel frontend and a Render backend, allowin
 | Component | Link |
 |-----------|------|
 | Live Application | https://relay-ai-steel.vercel.app |
-| Backend API | https://relay-ai-0g9j.onrender.com |
-| API Health Check | https://relay-ai-0g9j.onrender.com/health |
+| Backend API| https://relay-ai-0g9j.onrender.com/health |
 | Source Code | https://github.com/anmol12-gib/Relay-AI |
 
 > **Note:** The backend uses Render's free hosting tier. After a period of inactivity, the service may sleep, resulting in a slower initial response.
