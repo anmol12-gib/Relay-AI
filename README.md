@@ -1,203 +1,386 @@
-# Relay — Intelligence that stays online
 
-**A polished, deployable LLM chat application with multi-key resilience, built-in LiteLLM response caching, and persistent SQLite conversations.** Created for the Lyftr AI Full-Stack Assignment.
+# Relay-AI
 
-> **Deployment status:** Source code is supplied, but public URLs and real-provider calls are not claimed to be live or verified. Add real keys, deploy, and run the live acceptance script before submission.
+### Resilient AI Chat Application with Multi-Key Failover and Response Caching
 
-## 1. Live URLs
+Relay-AI is a full-stack AI chat application built with React, FastAPI, and Google Gemini. It focuses on improving the reliability of AI-powered applications through API-key failover, response caching, failure simulation, and request-level metadata.
 
-| Service | URL |
-|---|---|
-| Frontend | `https://YOUR-PROJECT.vercel.app` (replace after deployment) |
-| Backend | `https://YOUR-PROJECT.up.railway.app` (replace after deployment) |
-| Health | `https://YOUR-PROJECT.up.railway.app/health` |
-| Public GitHub repository | `https://github.com/YOUR-USERNAME/relay-ai` |
-| Demo video | `https://YOUR-VIDEO-LINK` |
+The application is deployed with a Vercel frontend and a Render backend, allowing users to access it through a public website without running the application locally.
 
-**Important:** Replace placeholders before submitting. Public links do not exist merely because code is in this repository.
+## Live Deployment
 
-## 2. Run locally: with Docker and without
+| Component | Link |
+|-----------|------|
+| Live Application | https://relay-ai-steel.vercel.app |
+| Backend API | https://relay-ai-0g9j.onrender.com |
+| API Health Check | https://relay-ai-0g9j.onrender.com/health |
+| Source Code | https://github.com/anmol12-gib/Relay-AI |
 
-### Requirements
-- Docker Desktop (Docker Compose included), or Python 3.12 and Node.js 22 if running without Docker.
-- Two valid API keys for the same chosen provider. The default model is `gemini/gemini-2.5-flash`. Get keys from [Google AI Studio](https://aistudio.google.com/apikey). For real rate-limit resilience, use keys backed by independently available quotas (ideally different projects), as two keys from one project can share the same quota.
+> **Note:** The backend uses Render's free hosting tier. After a period of inactivity, the service may sleep, resulting in a slower initial response.
 
-### With Docker (recommended)
+## Key Features
 
-1. Copy `.env.example` to `.env` at the **repository root**.
-2. Replace `YOUR_FIRST_GEMINI_KEY` and `YOUR_SECOND_GEMINI_KEY` with real separate keys. Keep the entire `LLM_API_KEYS` entry on **one line** and separate keys with one comma.
-3. Keep `ALLOWED_ORIGINS=http://localhost:3000,...` so the local frontend can contact the API.
-4. From the directory containing this README:
+### 1. AI-Powered Chat
+- Integrates Google Gemini through LiteLLM.
+- Provides a responsive chat interface.
+- Supports user-assistant conversations.
+- Displays AI-generated responses in a clean interface.
 
-   ```bash
-   make up
-   ```
+### 2. Multi-Key API Failover
+- Supports multiple Gemini API keys.
+- Implements fallback handling when an API request fails.
+- Improves resilience against individual key failures.
+- Provides a foundation for reliable LLM request routing.
 
-   Windows PowerShell users who do not have `make`: use `docker compose up --build -d`.
+### 3. Response Caching
+- Supports caching to reduce repeated model requests.
+- Improves response time for eligible repeated requests.
+- Helps reduce unnecessary API usage.
 
-5. Open http://localhost:3000 and http://localhost:8000/health. Expect `{"status":"ok","keys_configured":2,"cache_enabled":true}`.
-6. Stop: `make down` (or `docker compose down`). Your message history remains stored in the named `relay_data` volume. **Do not** run `docker compose down -v` unless you intend to delete history.
+### 4. Failure Simulation
+- Includes configurable failure simulation for testing.
+- Allows the application to demonstrate fallback behavior.
+- Helps validate resilience under simulated API failures.
 
-### Without Docker
+### 5. Request Metadata
+- Exposes request-related information for monitoring and debugging.
+- Supports visibility into model usage and request execution.
+- Helps demonstrate the behavior of the AI request pipeline.
 
-Create `.env` with the same keys. In a terminal:
+### 6. Full-Stack Cloud Deployment
+- React frontend deployed on Vercel.
+- FastAPI backend deployed on Render.
+- Public HTTPS communication between frontend and backend.
+- Configured CORS for the production application and supported Vercel deployment URLs.
+
+## Technology Stack
+
+| Layer | Technology |
+|-------|------------|
+| Frontend | React, Vite, JavaScript, CSS |
+| Backend | Python, FastAPI, Uvicorn |
+| AI Integration | Google Gemini, LiteLLM |
+| Database | SQLite |
+| Frontend Hosting | Vercel |
+| Backend Hosting | Render |
+| Version Control | Git, GitHub |
+
+## System Architecture
+
+```text
+                  USER
+                    |
+                    v
+             React Frontend
+               (Vercel)
+                    |
+                    | HTTPS Requests
+                    v
+             FastAPI Backend
+                (Render)
+                    |
+          +---------+---------+
+          |                   |
+          v                   v
+     Cache / SQLite      LLM Gateway
+                              |
+                              v
+                       Gemini API Keys
+                              |
+                    +---------+---------+
+                    |                   |
+                    v                   v
+                Primary Key       Fallback Key
+                    |                   |
+                    +---------+---------+
+                              |
+                              v
+                        AI Response
+                              |
+                              v
+                       React Frontend
+```
+
+## Project Structure
+
+```text
+Relay-AI/
+|
+|-- backend/
+|   |-- app/
+|   |   |-- main.py
+|   |   |-- config.py
+|   |   |-- ...
+|   |
+|   |-- requirements.txt
+|   |-- .env.example
+|
+|-- frontend/
+|   |-- src/
+|   |   |-- App.jsx
+|   |   |-- styles.css
+|   |   |-- ...
+|   |
+|   |-- package.json
+|   |-- .env.example
+|
+|-- README.md
+```
+
+## Local Installation
+
+### Prerequisites
+
+- Python 3.10 or later
+- Node.js and npm
+- Git
+- Google Gemini API keys
+
+### Step 1: Clone the Repository
+
+```bash
+git clone https://github.com/anmol12-gib/Relay-AI.git
+cd Relay-AI
+```
+
+### Step 2: Configure the Backend
+
+Navigate to the backend directory:
 
 ```bash
 cd backend
-python -m venv .venv
-# macOS/Linux:
-source .venv/bin/activate
-# Windows PowerShell: .venv\Scripts\Activate.ps1
-pip install -r requirements-dev.txt
-# macOS/Linux:
-export LLM_API_KEYS='KEY_ONE,KEY_TWO'
-export DATABASE_URL='sqlite:///./app.db'
-export ALLOWED_ORIGINS='http://localhost:3000'
-export ENABLE_FAILURE_SIMULATION=true
-# Windows PowerShell instead: $env:LLM_API_KEYS='KEY_ONE,KEY_TWO' etc.
-uvicorn app.main:app --reload --port 8000
 ```
 
-`uvicorn` loads environment variables; it does not automatically load `.env`. Either export the variables or start with `uvicorn app.main:app --env-file ../.env --reload --port 8000`. For a local run without Docker, set `DATABASE_URL=sqlite:///./app.db` in that file to avoid requiring `/data`.
+Create a virtual environment:
 
-In a second terminal:
+```bash
+python -m venv .venv
+```
+
+Activate it on Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Create a `.env` file inside the `backend` directory.
+
+Example configuration:
+
+```dotenv
+LLM_API_KEYS=your_first_gemini_key,your_second_gemini_key
+LLM_MODEL=gemini/gemini-3.5-flash
+DATABASE_URL=sqlite:///./app.db
+ALLOWED_ORIGINS=http://localhost:3000
+ENABLE_FAILURE_SIMULATION=true
+LLM_TIMEOUT_SECONDS=45
+DEFAULT_SYSTEM_PROMPT=You are Relay, a thoughtful, precise and helpful AI assistant.
+```
+
+Replace the placeholder API keys with valid Gemini API keys.
+
+Never commit your `.env` file or API keys to GitHub.
+
+### Step 3: Start the Backend
+
+From the `backend` directory, run:
+
+```bash
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8000
+```
+
+Backend URL:
+
+```text
+http://127.0.0.1:8000
+```
+
+Health endpoint:
+
+```text
+http://127.0.0.1:8000/health
+```
+
+### Step 4: Configure the Frontend
+
+Open another terminal and navigate to the frontend directory:
 
 ```bash
 cd frontend
+```
+
+Install dependencies:
+
+```bash
 npm install
+```
+
+Create a `.env.local` file:
+
+```dotenv
+VITE_API_BASE_URL=http://127.0.0.1:8000
+```
+
+### Step 5: Start the Frontend
+
+```bash
 npm run dev
 ```
 
-Open http://localhost:3000. Vite forwards the three API paths to localhost:8000 during local development.
+Open the local URL displayed by Vite in your terminal.
 
-### Automated backend tests
+For local development, ensure the frontend origin matches an entry in the backend's `ALLOWED_ORIGINS` configuration.
 
-```bash
-cd backend
-pip install -r requirements-dev.txt
-python -m pytest -q
+## Deployment
+
+### Frontend — Vercel
+
+The React frontend is deployed on Vercel.
+
+Configuration:
+
+| Setting | Value |
+|---------|-------|
+| Framework | Vite |
+| Root Directory | `frontend` |
+| Build Command | `npm run build` |
+| Output Directory | `dist` |
+
+Production environment variable:
+
+```dotenv
+VITE_API_BASE_URL=https://relay-ai-0g9j.onrender.com
 ```
 
-Tests use a **fake provider** so they do not consume API credits. They validate app routing, response schemas, SQLite history, cross-session cache expectations, input validation, fallback simulation, CORS, prompt persistence, and durable storage. They **do not** prove actual LiteLLM cache/provider integration; verify that separately against live credentials below.
+The `VITE_API_BASE_URL` variable contains a public backend address and is safe to expose in frontend code.
 
-### Live acceptance checks
+Gemini API keys must never be stored in frontend environment variables.
 
-After the backend is running with real keys:
+### Backend — Render
 
-```bash
-python scripts/check_contract.py http://localhost:8000
-# after deployment:
-python scripts/check_contract.py https://YOUR-BACKEND.up.railway.app
+The FastAPI backend is deployed as a Render Web Service.
+
+Configuration:
+
+| Setting | Value |
+|---------|-------|
+| Service Type | Web Service |
+| Runtime | Python |
+| Root Directory | `backend` |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
+| Instance Type | Free |
+
+Backend environment variables:
+
+```dotenv
+LLM_API_KEYS=<comma-separated-gemini-api-keys>
+LLM_MODEL=gemini/gemini-3.5-flash
+DATABASE_URL=sqlite:///./app.db
+ALLOWED_ORIGINS=https://relay-ai-steel.vercel.app
+ENABLE_FAILURE_SIMULATION=true
+LLM_TIMEOUT_SECONDS=45
+DEFAULT_SYSTEM_PROMPT=You are Relay, a thoughtful, precise and helpful AI assistant.
 ```
 
-The script uses unique messages and sessions to verify health, a genuine model response, cross-session cache, simulated key failover, an all-key 503, no history on failed requests, SQLite history, and a 422. If any check fails, **do not submit until it is fixed**. On macOS/Linux and PowerShell, run the command from repository root.
+Additional Vercel deployment origins are handled through the backend's CORS configuration.
 
-## 3. Design decisions: key fallback, caching, SQLite session storage
+Environment variables containing credentials must be configured securely in Render rather than committed to the repository.
 
-### Request flow
+## API Overview
 
-```text
-React frontend (new session ID each page load)
-      |
-      v
-POST /chat + optional X-Simulate-Failure
-      |
-      v
-Validate input (422 on bad values)
-      |
-      v
-Load session messages + saved system prompt from SQLite
-      |
-      v
-Build complete [system, history, new user] message list
-      |
-      v
-LiteLLM completion with built-in in-memory caching
-      |                 |
-      | cache hit       | cache miss or simulated failure
-      v                 v
-LLM_CACHE          key_1 -> key_2 -> ...
-      |                 |                 |
-      |                 | success         | all fail
-      v                 v                 v
-Store 2 messages   Store 2 messages   JSON 503, store nothing
-      |                 |
-      +--------+--------+
-               v
-         JSON reply + per-request metadata
+### Health Check
+
+```http
+GET /health
 ```
 
-**Key fallback.** `LLM_API_KEYS` is parsed in order into `key_1`, `key_2`, etc. Provider 429, quota exhaustion, 5xx, connection, and timeout errors trigger the next key, with no hard-coded provider response. A failure header only simulates statuses in that request and is honored solely when `ENABLE_FAILURE_SIMULATION=true`. Simulated calls bypass cache so demonstrations are meaningful. Invalid/other provider errors become sanitized JSON 503 responses without exposing keys.
+Used to verify that the backend is running and to inspect basic service status.
 
-**Caching.** Uses `litellm.cache = Cache(type="local")` and `litellm.completion(..., caching=True)`, rather than a custom answer cache. LiteLLM creates a deterministic cache key from the model and request data, including the full system/history/user message list. Cached replies are identified from LiteLLM's `_hidden_params['cache_hit']`. A cache hit reuses the provider response and its per-call usage, returns `key_id:null`, `fallback_attempts:0`, and measures wall-clock latency independently. Cache lives in the single backend process: **restarting the backend clears it**. Running multiple replicas would require a shared cache, which is outside the assignment's SQLite-only storage constraint.
+Example response:
 
-**SQLite.** A single SQLite file configured via `DATABASE_URL`, with `messages` plus `sessions` tables. Automatic schema creation, an index on `(session_id, id)`, atomic two-message commits, WAL mode and a per-session async lock protect history ordering. The container stores `/data/app.db` on a persistent Docker/Railway volume. For Railway root-owned volumes, set `RAILWAY_RUN_UID=0` as documented in the deployment guide; Docker Compose uses the image’s non-root user on its initialized named volume. The backend stores one exchange only after LLM success. Session prompts persist but do not appear in returned history.
-
-**Security and operational tradeoffs.** API keys stay server-side; CORS only grants explicitly configured frontend origins; input lengths are bounded; FastAPI errors have JSON `detail` and no secret-bearing stack traces; no analytics service or external database; single Uvicorn worker ensures one in-memory LiteLLM cache and uses the SQLite file safely. The assignment intentionally exposes a failure simulation hook; for a real public production product, protect or disable it. The UI is a proof-of-concept without authentication; don't treat session IDs as private authorization tokens.
-
-## 4. Verification: how to see failover, cache hits and per-message token usage
-
-**Healthy backend**: `GET /health` returns 200, `status: "ok"`, `keys_configured: 2` or greater, and `cache_enabled: true`.
-
-**Cache hit**: send `What is the capital of France?` in a new session. Create another new session with **exactly** the same message and unchanged system prompt. Second reply should say `LLM_CACHE`, with identical text and token counts, `key_id:null`, and faster latency. **Sending the same message twice in the SAME session is NOT a cache hit**, because the second request includes extra history.
-
-**Multi-turn**: send `Remember my favorite color is green.`; then `What color did I say?` in the **same** session. Inspect `GET /sessions/{session_id}/messages` (the inspector shows the URL). History is oldest first and excludes the system prompt.
-
-**Failover**: open **Configuration** → **Failure simulation** → **key_1 → 429**. Send a new message. Inspect response: expect HTTP 200, `key_id:key_2`, `fallback_attempts:1`, `resolution_source:LIVE_INFERENCE`. Repeat with `key_1 → 500`.
-
-**All keys fail**: choose **All keys → 429**. Send a new message; expect a readable error in chat and HTTP 503 `{"detail":"all providers unavailable"}`. That question is **not** added to SQLite history. Turn simulation off afterward.
-
-**Tokens**: for each assistant bubble, inspect the chips (`in`, `out`) or the **Request inspector** JSON. These are provider usage fields `prompt_tokens` and `completion_tokens`, not accumulated conversation totals.
-
-**Direct endpoint tests (terminal)**:
-
-```bash
-# Replace the session ID with a fresh value.
-curl -X POST 'http://localhost:8000/chat' -H 'Content-Type: application/json' \
-  -d '{"session_id":"demo-a","message":"Hello from curl"}'
-
-curl -X POST 'http://localhost:8000/chat' -H 'Content-Type: application/json' \
-  -H 'X-Simulate-Failure: key_1=429' \
-  -d '{"session_id":"demo-b","message":"Explain resilience in one sentence"}'
-
-curl -X POST 'http://localhost:8000/chat' -H 'Content-Type: application/json' \
-  -H 'X-Simulate-Failure: *=429' \
-  -d '{"session_id":"demo-c","message":"This must fail"}'
-
-curl 'http://localhost:8000/sessions/demo-a/messages'
+```json
+{
+  "status": "ok",
+  "keys_configured": 2,
+  "cache_enabled": true
+}
 ```
 
-On Windows PowerShell, prefer `curl.exe` (the legacy `curl` command may alias to PowerShell functionality) or use the included `scripts/check_contract.py`.
+### Chat
 
-## 5. Setup Used: your editor and AI tools
+```http
+POST /chat
+```
 
-- **Implementation assistance:** OpenAI ChatGPT (GPT-6) for architecture, implementation, documentation and initial test generation.
-- **Local validation:** Python 3, pytest and static code inspection; deterministic mock-gateway API tests passed in the authoring environment.
-- **Tools for deployment and optional further work:** VS Code or another editor, Git/GitHub, Docker Desktop, Vercel, Railway, Google AI Studio.
-- **Disclosure:** The creator should edit this section to truthfully reflect any tools actually used after this handoff. The source-generation environment could not install LiteLLM/npm dependencies or run Docker/live provider requests, so a real-provider deployment is not yet verified.
+Processes chat requests through the backend's AI integration, including the configured caching and failover mechanisms.
 
-## 6. Bonus features (if any): what you added beyond the requirements and why
+## Reliability Design
 
-- **Premium responsive interface:** polished chat experience, dark-mode design, actionable suggestion cards, loading and error states, markdown rendering, touch-friendly mobile layout.
-- **Live operational panel:** health/key count/cache status, recent request metrics, reply count and cache-hit count.
-- **Request inspector:** copy structured response JSON and open health/history endpoints for transparent review.
-- **Interactive resilience testing:** failure simulation settings with a real `X-Simulate-Failure` request header; no need to type developer commands for every demo.
-- **Persistent system instructions:** optional system prompt stored per session, exposed in the UI while hidden from the history endpoint.
-- **Acceptance test script:** one command checks the most important deployed API requirements end-to-end.
-- **Developer-friendly repository:** Docker Compose, small multi-stage images, Makefile, example env files, isolated deterministic API tests, and an explicit demonstration script.
+Relay-AI includes multiple mechanisms intended to make AI requests more resilient:
 
----
+**API-key failover:** Multiple configured keys allow the application to attempt an alternative credential when supported failure conditions occur.
 
-## Exact HTTP contract
+**Caching:** Eligible repeated requests can reuse previously stored responses instead of making additional model calls.
 
-| Method | Route | Behavior |
-|---|---|---|
-| `GET` | `/health` | Key pool + SQLite readiness + cache-enabled flag |
-| `POST` | `/chat` | Multi-turn LLM answer, per-request metadata, automatic fallback, caching |
-| `GET` | `/sessions/{session_id}/messages` | SQLite history, oldest first, no system prompt |
+**Failure simulation:** Configurable failure injection supports testing and demonstrating the application's fallback behavior.
 
-All errors return JSON with `detail`. Required client `data-testid`: `chat-input`, `send-button`, `assistant-message`, `meta-source`, `meta-model`, `meta-latency`, `meta-input-tokens`, `meta-output-tokens`, `system-prompt-input`.
+**Health monitoring:** The `/health` endpoint provides a simple way to verify backend availability.
 
-## Deploying
+These mechanisms are intended to improve reliability; they do not guarantee uninterrupted service during provider outages or hosting failures.
 
-Follow **`DEPLOYMENT_GUIDE.md`** for beginner instructions. Follow **`DEMO_VIDEO_SCRIPT.md`** to record the required 2–3 minute narrated video. Complete **`SUBMISSION_CHECKLIST.md`** before using the assignment submission form.
+## Testing and Demonstration
+
+The following scenarios can be used to demonstrate the application:
+
+1. Open the deployed website and verify the backend connection.
+2. Submit a prompt and observe the generated response.
+3. Repeat an eligible request to demonstrate caching.
+4. Use the supported failure-simulation mechanism to test fallback behavior.
+5. Inspect the available request metadata.
+6. Verify that the deployed application works without running the local FastAPI server.
+
+## Hosting Limitations
+
+The application currently uses free hosting services.
+
+- Render may spin down the backend after inactivity.
+- The first request after inactivity may experience a cold-start delay.
+- SQLite uses Render's ephemeral filesystem on the free tier.
+- Stored chat history and cache data may be lost after restarts or redeployments.
+- API usage remains subject to the configured Gemini provider limits.
+
+For production use, a persistent managed database and more robust hosting infrastructure would be appropriate.
+
+## Security Considerations
+
+- Gemini API keys are stored in backend environment variables.
+- API keys are not included in frontend source code.
+- CORS restricts supported browser origins.
+- Environment files containing credentials should remain excluded from version control.
+- Failure simulation should be disabled when it is no longer required for testing or evaluation.
+- Public deployment requires additional protections for sustained production use, including appropriate rate limiting and abuse prevention.
+
+## Future Improvements
+
+- Persistent cloud database integration.
+- Improved rate limiting and request quotas.
+- Additional LLM provider support.
+- Automated integration and reliability testing.
+- More detailed monitoring and observability.
+- Improved cache management.
+- Production-grade deployment configuration.
+
+## Repository
+
+GitHub: https://github.com/anmol12-gib/Relay-AI
+
+## License
+
+No license is specified unless a separate LICENSE file is added to the repository.
