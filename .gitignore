@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+!frontend/.env.example
+__pycache__/
+.pytest_cache/
+.venv/
+*.py[cod]
+*.db
+*.db-shm
+*.db-wal
+node_modules/
+dist/
+.DS_Store
+coverage/
+.vercel/
