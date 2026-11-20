@@ -64,7 +64,11 @@ def create_app(settings: Settings | None = None, store: MessageStore | None = No
     if gateway is None and settings.llm_api_keys:
         gateway = LiteLLMGateway(settings.llm_api_keys, settings.model, settings.request_timeout)
 
-    app = FastAPI(title="Relay API", version="1.0.0", docs_url=None, redoc_url=None, openapi_url=None)
+    app = FastAPI(
+    title="Relay-AI API",
+    version="1.0.0",
+    description="FastAPI backend for Relay-AI, featuring Gemini integration, response caching, and API-key failover."
+)
     app.add_middleware(
     CORSMiddleware,
     allow_origins=list(settings.allowed_origins),
