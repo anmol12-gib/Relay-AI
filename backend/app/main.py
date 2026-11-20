@@ -65,7 +65,14 @@ def create_app(settings: Settings | None = None, store: MessageStore | None = No
         gateway = LiteLLMGateway(settings.llm_api_keys, settings.model, settings.request_timeout)
 
     app = FastAPI(title="Relay API", version="1.0.0", docs_url=None, redoc_url=None, openapi_url=None)
-    app.add_middleware(CORSMiddleware, allow_origins=list(settings.allowed_origins), allow_credentials=False, allow_methods=["GET", "POST"], allow_headers=["Content-Type", "X-Simulate-Failure"])
+    app.add_middleware(
+    CORSMiddleware,
+    allow_origins=list(settings.allowed_origins),
+    allow_origin_regex=r"https://relay-[a-z0-9-]+-anmols-projects-0c0aea06\.vercel\.app",
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "X-Simulate-Failure"],
+)
     # Serialize concurrent chats in a single session to preserve conversation ordering.
     session_locks: dict[str, asyncio.Lock] = defaultdict(asyncio.Lock)
 
