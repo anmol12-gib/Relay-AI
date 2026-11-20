@@ -2,6 +2,9 @@
 from dataclasses import dataclass
 import os
 
+from dotenv import load_dotenv
+load_dotenv()
+
 
 def flag(name: str, default: bool = False) -> bool:
     return os.getenv(name, str(default)).strip().lower() in {"true", "1", "yes", "on"}
